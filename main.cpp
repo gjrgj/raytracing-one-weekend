@@ -4,10 +4,19 @@
 #include "float.h"
 #include "camera.h"
 
+vec3 random_in_unit_sphere() {
+	vec3 p;
+	do {
+		p = 2.0*vec3(drand48(), drand48(), drand48()) - vec3(1,1,1);
+	} while (p.squared_length() >= 1.0);
+	return p;
+}
+
 vec3 color(const ray& r, hitable *world) {
 	hit_record rec;
 	if (world->hit(r, 0.0, MAXFLOAT, rec)) {
-		return 0.5*vec3(rec.normal.x()+1, rec.normal.y()+1, rec.normal.z()+1);
+		vec3 target = rec.p + rec.normal + random_in_unit_sphere();
+		return 0.5*color(ray(rec.p, target-rec.p), world);
 	}
 	else {
 		vec3 unit_direction = unit_vector(r.direction());
@@ -19,7 +28,7 @@ vec3 color(const ray& r, hitable *world) {
 int main() {
 	int nx = 600;
 	int ny = 300;
-	int ns = 100;
+	int ns = 50;
 	std::cout << "P3\n" << nx << " " << ny << "\n255\n";
 	hitable *list[2];
 	list[0] = new sphere(vec3(0,0,-1), 0.5);
